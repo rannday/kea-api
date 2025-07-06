@@ -7,23 +7,17 @@ import (
 	"testing"
 
 	"github.com/rannday/kea-api/client"
-	"github.com/rannday/kea-api/internal/testenv"
 )
 
 func TestMain(m *testing.M) {
-	if err := testenv.StartKeaContainer(); err != nil {
-		panic(err)
-	}
-	code := m.Run()
-	testenv.StopKeaContainer()
-	os.Exit(code)
+	os.Exit(m.Run())
 }
 
 func keaURL() string {
 	if url := os.Getenv("KEA_API_URL"); url != "" {
 		return url
 	}
-	return "http://localhost:8001"
+	return "http://localhost:8000"
 }
 
 // TestBasicAuthLive checks that BasicAuth works with Kea's control agent
