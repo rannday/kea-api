@@ -7,7 +7,29 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kea-api
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24.x
+
+      - name: Run unit tests
+        run: go test ./...
+
+  integration:
+    name: Integration Tests
+    needs: unit
+    # Only run if [integration] is in commit message OR PR title
+    if: |
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[integration]')) ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.title, '[integration]'))
     runs-on: ubuntu-latest
 
     services:
@@ -47,20 +69,17 @@ jobs:
           docker run -d --name kea-int-test -p 8000:8000 kea-custom:latest
           echo "Waiting for Kea Control Agent (max 60s)..."
           for i in {1..60}; do
-            if curl -s http://localhost:8000 | grep result; then
+            response=$(curl -sf http://localhost:8000 || true)
+            if echo "$response" | grep -q '"result"[[:space:]]*:[[:space:]]*0'; then
               echo "Kea Control Agent is up."
               break
             fi
             sleep 1
           done
-          echo "Kea logs (for debugging if needed):"
-          docker logs kea-int-test || true
-
-      - name: Run unit tests
-        run: go test ./...
+          echo "Kea Control Agent did not respond." && curl -s http://localhost:8000 || true
 
       - name: Run integration tests
-        run: go test -tags=integration ./...
+        run: go test -tags=integration ./internal/tests
 
       - name: Cleanup
         if: always()
