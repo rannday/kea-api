@@ -1,7 +1,7 @@
 package dhcp6
 
 import (
-	"github.com/rannday/isc-kea/client"
+	"github.com/rannday/kea-api/client"
 )
 
 // StatusGet fetches the DHCPv6 server status using the generic helper.

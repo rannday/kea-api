@@ -3,10 +3,10 @@ package kea
 // Package kea provides a unified, high-level entrypoint for interacting with ISC Kea services.
 
 import (
-	"github.com/rannday/isc-kea/agent"
-	"github.com/rannday/isc-kea/client"
-	"github.com/rannday/isc-kea/dhcp4"
-	"github.com/rannday/isc-kea/dhcp6"
+	"github.com/rannday/kea-api/agent"
+	"github.com/rannday/kea-api/client"
+	"github.com/rannday/kea-api/dhcp4"
+	"github.com/rannday/kea-api/dhcp6"
 )
 
 // Shared Client type

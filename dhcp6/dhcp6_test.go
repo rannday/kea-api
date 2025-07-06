@@ -3,9 +3,9 @@ package dhcp6
 import (
 	"testing"
 
-	"github.com/rannday/isc-kea/client"
-	"github.com/rannday/isc-kea/testutils"
-	"github.com/rannday/isc-kea/types"
+	"github.com/rannday/kea-api/client"
+	"github.com/rannday/kea-api/internal/testenv"
+	"github.com/rannday/kea-api/types"
 )
 
 // TestStatusGet tests the StatusGet function for the CtrlDHCP6 type.
@@ -25,11 +25,11 @@ func TestStatusGet(t *testing.T) {
 		ExtendedInfoTables:    true,
 	}
 
-	client := testutils.NewTestClient(t,
-		testutils.ExpectCommand(t, "status-get", client.ServiceDHCP6),
+	client := testenv.NewTestClient(t,
+		testenv.ExpectCommand(t, "status-get", client.ServiceDHCP6),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
-			Arguments: testutils.MustEncodeRawJSON(t, want),
+			Arguments: testenv.MustEncodeRawJSON(t, want),
 		}},
 	)
 
@@ -56,11 +56,11 @@ func TestListCommands(t *testing.T) {
 		"statistic-sample-count-set", "statistic-sample-count-set-all", "status-get", "version-get",
 	}
 
-	client := testutils.NewTestClient(t,
-		testutils.ExpectCommand(t, "list-commands", client.ServiceDHCP6),
+	client := testenv.NewTestClient(t,
+		testenv.ExpectCommand(t, "list-commands", client.ServiceDHCP6),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
-			Arguments: testutils.MustEncodeRawJSON(t, want),
+			Arguments: testenv.MustEncodeRawJSON(t, want),
 		}},
 	)
 

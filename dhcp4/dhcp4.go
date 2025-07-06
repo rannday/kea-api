@@ -1,7 +1,7 @@
 package dhcp4
 
 import (
-	"github.com/rannday/isc-kea/client"
+	"github.com/rannday/kea-api/client"
 )
 
 /*

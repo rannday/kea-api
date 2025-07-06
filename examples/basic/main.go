@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/rannday/isc-kea/agent"
-	"github.com/rannday/isc-kea/client"
-	"github.com/rannday/isc-kea/utils"
+	"github.com/rannday/kea-api/agent"
+	"github.com/rannday/kea-api/client"
+	"github.com/rannday/kea-api/internal/utils"
 )
 
 func main() {

@@ -8,3 +8,14 @@ make test
 ```bash
 test.bat
 ```
+## Integration Tests
+To run integration tests against a docker container  
+```bash
+test.bat -i
+```
+https://github.com/rannday/kea-docker  
+
+Very basic for now. Want to eventually have it setup a mock dhcp server with dummy subnets, all configured through SQL. Maybe even spin up two and play with HA.
+## TODO
+- TLS tests - Would have to create the certs via docker, or maybe before hand and just include them. Seems annoying.
+- DDNS - No idea where to begin on this one, but I'd like to figure it out.

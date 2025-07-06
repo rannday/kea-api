@@ -1,6 +1,6 @@
 package agent
 
-import "github.com/rannday/isc-kea/client"
+import "github.com/rannday/kea-api/client"
 
 /*
  * Control Agent API

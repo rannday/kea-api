@@ -1,6 +1,6 @@
 package dhcp4
 
-import "github.com/rannday/isc-kea/types"
+import "github.com/rannday/kea-api/types"
 
 // DHCP4Status represents the result of status-get for dhcp4.
 type DHCP4Status struct {

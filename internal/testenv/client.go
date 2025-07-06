@@ -1,4 +1,4 @@
-package testutils
+package testenv
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/rannday/isc-kea/client"
+	"github.com/rannday/kea-api/client"
 )
 
 // MustEncodeRawJSON marshals a value into json.RawMessage.

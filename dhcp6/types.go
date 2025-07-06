@@ -1,6 +1,6 @@
 package dhcp6
 
-import "github.com/rannday/isc-kea/types"
+import "github.com/rannday/kea-api/types"
 
 // DHCP6Status represents the result of status-get for dhcp6.
 type DHCP6Status struct {
