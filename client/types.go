@@ -42,6 +42,7 @@ type Service string
 const (
 	ServiceDHCP4 Service = "dhcp4"
 	ServiceDHCP6 Service = "dhcp6"
+	ServiceDDNS  Service = "d2"
 )
 
 // CommandRequest represents a Kea API command.

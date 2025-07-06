@@ -5,23 +5,24 @@ import (
 	"log"
 
 	"github.com/rannday/isc-kea/agent"
+	"github.com/rannday/isc-kea/client"
 	"github.com/rannday/isc-kea/utils"
 )
 
 func main() {
-	client := agent.NewHTTPClient("http://192.168.66.2:8000/",
-		agent.WithAuth(&agent.BasicAuth{
+	c := client.NewHTTP("http://192.168.66.2:8000/",
+		client.WithAuth(&client.BasicAuth{
 			Username: "kea-api",
 			Password: "kea",
 		}),
 	)
 
-	status, err := agent.StatusGet(client)
+	status, err := agent.StatusGet(c)
 	if err != nil {
 		log.Fatalf("Failed to get agent status: %v", err)
 	}
 
-	fmt.Printf("Control Agent Status:\n")
+	fmt.Println("Control Agent Status:")
 	fmt.Printf("  PID:    %d\n", status.PID)
 	fmt.Printf("  Uptime: %s\n", utils.HumanDuration(status.Uptime))
 	fmt.Printf("  Reload: %s\n", utils.HumanDuration(status.Reload))

@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/rannday/isc-kea/client"
+	"github.com/rannday/isc-kea/testutils"
 	"github.com/rannday/isc-kea/types"
-	"github.com/rannday/isc-kea/utils"
 )
 
 // TestStatusGet tests the StatusGet function for the CtrlDHCP6 type.
@@ -25,11 +25,11 @@ func TestStatusGet(t *testing.T) {
 		ExtendedInfoTables:    true,
 	}
 
-	client := utils.NewTestClient(t,
-		utils.ExpectCommand(t, "status-get", client.ServiceDHCP6),
+	client := testutils.NewTestClient(t,
+		testutils.ExpectCommand(t, "status-get", client.ServiceDHCP6),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
-			Arguments: utils.MustEncodeRawJSON(t, want),
+			Arguments: testutils.MustEncodeRawJSON(t, want),
 		}},
 	)
 
@@ -56,11 +56,11 @@ func TestListCommands(t *testing.T) {
 		"statistic-sample-count-set", "statistic-sample-count-set-all", "status-get", "version-get",
 	}
 
-	client := utils.NewTestClient(t,
-		utils.ExpectCommand(t, "list-commands", client.ServiceDHCP6),
+	client := testutils.NewTestClient(t,
+		testutils.ExpectCommand(t, "list-commands", client.ServiceDHCP6),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
-			Arguments: utils.MustEncodeRawJSON(t, want),
+			Arguments: testutils.MustEncodeRawJSON(t, want),
 		}},
 	)
 

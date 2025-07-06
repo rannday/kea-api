@@ -2,12 +2,53 @@ package client
 
 import (
 	"encoding/json"
+	"net"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
-	"unsafe"
+	"time"
 )
+
+// StartSocketServer starts a TCP or UNIX socket server that responds with the given payload.
+func startSocketServer(t *testing.T, network, address string, response any) net.Listener {
+	t.Helper()
+
+	if network == "unix" {
+		_ = os.Remove(address) // Ensure no stale socket
+	}
+
+	l, err := net.Listen(network, address)
+	if err != nil {
+		t.Fatalf("failed to start %s listener: %v", network, err)
+	}
+
+	go func() {
+		conn, err := l.Accept()
+		if err != nil {
+			return
+		}
+		defer conn.Close()
+
+		var req CommandRequest
+		if err := json.NewDecoder(conn).Decode(&req); err != nil {
+			return
+		}
+
+		_ = json.NewEncoder(conn).Encode(response)
+	}()
+
+	return l
+}
+
+// TempSocketPath returns a temp file path for use as a UNIX socket.
+func TempSocketPath(t *testing.T, name string) string {
+	t.Helper()
+	dir := t.TempDir()
+	return filepath.Join(dir, name+".sock")
+}
 
 // TestBasicAuthApply tests the Apply method of BasicAuth.
 func TestBasicAuthApply(t *testing.T) {
@@ -27,7 +68,7 @@ func TestBasicAuthApply(t *testing.T) {
 	}
 }
 
-// TestTLSAuthConfigureClientFailsGracefully tests that TLSAuth.ConfigureClient fails gracefully when cert files are missing.
+// TestTLSAuthConfigureClientFailsGracefully ensures TLSAuth fails on missing cert files.
 func TestTLSAuthConfigureClientFailsGracefully(t *testing.T) {
 	auth := &TLSAuth{
 		CertFile: "testdata/missing.crt",
@@ -42,38 +83,33 @@ func TestTLSAuthConfigureClientFailsGracefully(t *testing.T) {
 	}
 }
 
-// TestWithAuthOption confirms that WithAuth sets the AuthProvider.
+// TestWithAuthOption checks that WithAuth applies the Authorization header.
 func TestWithAuthOption(t *testing.T) {
-	auth := &BasicAuth{
-		Username: "u",
-		Password: "p",
-	}
-	c := NewHTTPClient("http://localhost:1234", WithAuth(auth))
+	auth := &BasicAuth{Username: "u", Password: "p"}
 
-	internalAuth := cAuth(c)
-	if internalAuth == nil {
-		t.Fatal("expected AuthProvider to be set")
-	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		want := "Basic dTpw"
+		got := r.Header.Get("Authorization")
+		if got != want {
+			t.Errorf("Authorization header = %q, want %q", got, want)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode([]CommandResponse{{
+			Result:    ResultSuccess,
+			Arguments: json.RawMessage(`{}`),
+		}})
+	}))
+	defer server.Close()
 
-	req, _ := http.NewRequest("GET", "http://fake", nil)
-	if err := internalAuth.Apply(req); err != nil {
-		t.Fatalf("Apply failed: %v", err)
-	}
-	if got := req.Header.Get("Authorization"); got == "" {
-		t.Error("Authorization header was not set by applied auth")
+	c := NewHTTP(server.URL, WithAuth(auth))
+	var res []CommandResponse
+	err := c.Call(CommandRequest{Command: "status-get"}, &res)
+	if err != nil {
+		t.Fatalf("Call failed: %v", err)
 	}
 }
 
-// TestWithHTTPClientOption checks that a custom HTTP client is applied.
-func TestWithHTTPClientOption(t *testing.T) {
-	custom := &http.Client{}
-	c := NewHTTPClient("http://x", WithHTTPClient(custom))
-	if cHTTP(c) != custom {
-		t.Error("custom http.Client not applied")
-	}
-}
-
-// TestClientCall_UsesAuthAndDecodes tests that Call uses the auth provider and decodes the response.
+// TestClientCall_UsesAuthAndDecodes tests full request/response with auth and decoding.
 func TestClientCall_UsesAuthAndDecodes(t *testing.T) {
 	response := []CommandResponse{{
 		Result:    ResultSuccess,
@@ -92,7 +128,7 @@ func TestClientCall_UsesAuthAndDecodes(t *testing.T) {
 	defer server.Close()
 
 	auth := &BasicAuth{Username: "foo", Password: "bar"}
-	c := NewHTTPClient(server.URL, WithAuth(auth))
+	c := NewHTTP(server.URL, WithAuth(auth))
 
 	var res []CommandResponse
 	err := c.Call(CommandRequest{Command: "status-get"}, &res)
@@ -105,7 +141,7 @@ func TestClientCall_UsesAuthAndDecodes(t *testing.T) {
 	}
 }
 
-// TestClientCall_RejectsFailureResult tests that Call rejects responses with non-success results.
+// TestClientCall_RejectsFailureResult tests that an error is returned for non-success result.
 func TestClientCall_RejectsFailureResult(t *testing.T) {
 	response := []CommandResponse{{
 		Result:    ResultUnsupported,
@@ -119,7 +155,7 @@ func TestClientCall_RejectsFailureResult(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := NewHTTPClient(server.URL)
+	c := NewHTTP(server.URL)
 
 	var res []CommandResponse
 	err := c.Call(CommandRequest{Command: "status-xyz"}, &res)
@@ -127,30 +163,76 @@ func TestClientCall_RejectsFailureResult(t *testing.T) {
 		t.Fatal("expected error due to unsupported command, got nil")
 	}
 
-	if got := err.Error(); got != "unsupported command: unsupported command: status-xyz" {
+	want := "unsupported command: unsupported command: status-xyz"
+	if got := err.Error(); got != want {
 		t.Errorf("unexpected error: %v", got)
 	}
 }
 
-// --- Helpers ---
+// TestSocketTransport_TCP verifies TCP socket communication.
+func TestSocketTransport_TCP(t *testing.T) {
+	response := []CommandResponse{{
+		Result:    ResultSuccess,
+		Arguments: json.RawMessage(`{}`),
+	}}
 
-// cAuth returns the AuthProvider from the client using reflection.
-func cAuth(c *Client) AuthProvider {
-	return reflectGet[AuthProvider](c, "auth")
+	l := startSocketServer(t, "tcp", "127.0.0.1:12345", response)
+	defer l.Close()
+
+	tr := NewSocketTransport("tcp", "127.0.0.1:12345", 2*time.Second)
+	c := NewClient(tr)
+
+	var out []CommandResponse
+	err := c.Call(CommandRequest{Command: "status-get"}, &out)
+	if err != nil {
+		t.Fatalf("Call failed: %v", err)
+	}
+	if len(out) != 1 || out[0].Result != ResultSuccess {
+		t.Errorf("unexpected result: %+v", out)
+	}
 }
 
-// cHTTP returns the *http.Client from the client using reflection.
-func cHTTP(c *Client) *http.Client {
-	return reflectGet[*http.Client](c, "httpClient")
+// TestSocketTransport_UNIX verifies UNIX socket communication.
+func TestSocketTransport_UNIX(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("UNIX socket test skipped on Windows")
+	}
+
+	socketPath := "/tmp/kea-test.sock"
+	_ = os.Remove(socketPath)
+
+	response := []CommandResponse{{
+		Result:    ResultSuccess,
+		Arguments: json.RawMessage(`{}`),
+	}}
+
+	l := startSocketServer(t, "unix", socketPath, response)
+	defer func() {
+		l.Close()
+		_ = os.Remove(socketPath)
+	}()
+
+	tr := NewSocketTransport("unix", socketPath, 2*time.Second)
+	c := NewClient(tr)
+
+	var out []CommandResponse
+	err := c.Call(CommandRequest{Command: "status-get"}, &out)
+	if err != nil {
+		t.Fatalf("Call failed: %v", err)
+	}
+	if len(out) != 1 || out[0].Result != ResultSuccess {
+		t.Errorf("unexpected result: %+v", out)
+	}
 }
 
-// reflectGet is a helper to get an unexported field from Client.
-func reflectGet[T any](c *Client, field string) T {
-	v := reflect.ValueOf(c).Elem().FieldByName(field)
+// TestSocketTransport_ConnectError verifies connection error handling.
+func TestSocketTransport_ConnectError(t *testing.T) {
+	tr := NewSocketTransport("tcp", "127.0.0.1:65000", 1*time.Second)
+	c := NewClient(tr)
 
-	// Create a pointer to the field using unsafe
-	ptr := unsafe.Pointer(v.UnsafeAddr())
-	val := *(*T)(ptr)
-
-	return val
+	var out []CommandResponse
+	err := c.Call(CommandRequest{Command: "status-get"}, &out)
+	if err == nil {
+		t.Fatal("expected error on connect, got nil")
+	}
 }

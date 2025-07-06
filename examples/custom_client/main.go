@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/rannday/isc-kea/agent"
+	"github.com/rannday/isc-kea/client"
 	"github.com/rannday/isc-kea/utils"
 )
 
@@ -21,16 +22,18 @@ func main() {
 		},
 	}
 
-	client := agent.NewHTTPClient(
+	transport := client.NewHTTPTransport(
 		"http://192.168.66.2:8000/",
-		agent.WithHTTPClient(httpClient),
-		agent.WithAuth(&agent.BasicAuth{
+		client.WithHTTPClient(httpClient),
+		client.WithAuth(&client.BasicAuth{
 			Username: "kea-api",
 			Password: "kea",
 		}),
 	)
 
-	status, err := agent.StatusGet(client)
+	c := client.NewClient(transport)
+
+	status, err := agent.StatusGet(c)
 	if err != nil {
 		log.Fatalf("Failed to get agent status: %v", err)
 	}

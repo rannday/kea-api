@@ -15,3 +15,8 @@ type DHCP6Status struct {
 	DHCPState             types.DHCPState        `json:"dhcp-state"`
 	ExtendedInfoTables    bool                   `json:"extended-info-tables"`
 }
+
+// DHCP6Version is the response type for version-get on kea-dhcp6.
+type DHCP6Version struct {
+	Extended string `json:"extended"`
+}

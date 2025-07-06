@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/rannday/isc-kea/client"
-	"github.com/rannday/isc-kea/utils"
+	"github.com/rannday/isc-kea/testutils"
 )
 
 // TestStatusGet tests the StatusGet function for the CtrlAgentStatus type.
@@ -17,11 +17,11 @@ func TestStatusGet(t *testing.T) {
 		Reload: 456,
 	}
 
-	client := utils.NewTestClient(t,
-		utils.ExpectCommand(t, "status-get"),
+	client := testutils.NewTestClient(t,
+		testutils.ExpectCommand(t, "status-get"),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
-			Arguments: utils.MustEncodeRawJSON(t, want),
+			Arguments: testutils.MustEncodeRawJSON(t, want),
 		}},
 	)
 
@@ -43,11 +43,11 @@ func TestListCommands(t *testing.T) {
 		"config-test", "config-write", "list-commands", "shutdown", "status-get", "version-get",
 	}
 
-	client := utils.NewTestClient(t,
-		utils.ExpectCommand(t, "list-commands"),
+	client := testutils.NewTestClient(t,
+		testutils.ExpectCommand(t, "list-commands"),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
-			Arguments: utils.MustEncodeRawJSON(t, want),
+			Arguments: testutils.MustEncodeRawJSON(t, want),
 		}},
 	)
 

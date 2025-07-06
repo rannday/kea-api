@@ -14,3 +14,8 @@ type DHCP4Status struct {
 	Sockets               map[string]interface{} `json:"sockets"`
 	DHCPState             types.DHCPState        `json:"dhcp-state"`
 }
+
+// DHCP4Version is the response type for version-get on kea-dhcp4.
+type DHCP4Version struct {
+	Extended string `json:"extended"`
+}

@@ -1,4 +1,4 @@
-package utils
+package testutils
 
 import (
 	"encoding/json"
@@ -46,10 +46,10 @@ func NewTestClient(
 	server := httptest.NewServer(handler)
 	t.Cleanup(server.Close)
 
-	return client.NewHTTPClient(server.URL)
+	return client.NewHTTP(server.URL)
 }
 
-// ExpectCommand returns a function that can be used to validate a CommandRequest
+// ExpectCommand returns a function that can be used to validate a CommandRequest.
 func ExpectCommand(t *testing.T, wantCommand string, wantService ...client.Service) func(*testing.T, client.CommandRequest) {
 	return func(t *testing.T, req client.CommandRequest) {
 		t.Helper()

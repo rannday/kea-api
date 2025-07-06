@@ -1,6 +1,6 @@
 package kea
 
-// Package kea provides a unified, high-level entrypoint for interacting with ISC Kea services
+// Package kea provides a unified, high-level entrypoint for interacting with ISC Kea services.
 
 import (
 	"github.com/rannday/isc-kea/agent"
@@ -9,25 +9,29 @@ import (
 	"github.com/rannday/isc-kea/dhcp6"
 )
 
+// Shared Client type
 type Client = client.Client
 
+// Top-level constructors (unified)
 var (
-	NewHTTPClient  = client.NewHTTPClient
-	WithHTTPClient = client.WithHTTPClient
-	WithAuth       = client.WithAuth
+	NewHTTP   = client.NewHTTP
+	NewSocket = client.NewSocket
 )
 
 // Control Agent API
 var (
-	StatusGet = agent.StatusGet
+	StatusGet    = agent.StatusGet
+	ListCommands = agent.ListCommands
 )
 
-// DHCP4 API
+// DHCPv4 API
 var (
-	StatusGet4 = dhcp4.StatusGet
+	StatusGet4    = dhcp4.StatusGet
+	ListCommands4 = dhcp4.ListCommands
 )
 
-// DHCP6 API
+// DHCPv6 API
 var (
-	StatusGet6 = dhcp6.StatusGet
+	StatusGet6    = dhcp6.StatusGet
+	ListCommands6 = dhcp6.ListCommands
 )

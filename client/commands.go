@@ -1,55 +1,29 @@
 package client
 
-import (
-	"encoding/json"
-	"fmt"
-)
+/* Shared Kea API commands across ctrl-agent, dhcp4, dhcp6, and ddns
+build-report               config-get                 config-hash-get
+config-reload              config-set                 config-test
+config-write               list-commands              shutdown
+status-get                 version-get
 
-// StatusGet is a generic helper for unmarshaling a status-get command.
-func StatusGet[T any](c *Client, service Service) (T, error) {
-	req := CommandRequest{
-		Command: "status-get",
-	}
-	if service != "" {
-		req.Service = []Service{service}
-	}
-
-	var res []CommandResponse
-	var zero T
-	if err := c.Call(req, &res); err != nil {
-		return zero, fmt.Errorf("status-get failed: %w", err)
-	}
-	if len(res) == 0 {
-		return zero, fmt.Errorf("empty response")
-	}
-
-	var status T
-	if err := json.Unmarshal(res[0].Arguments, &status); err != nil {
-		return zero, fmt.Errorf("decode arguments: %w", err)
-	}
-	return status, nil
-}
+// Shared by dhcp4, dhcp6, and ddns (not ctrl-agent)
+statistic-get              statistic-get-all          statistic-reset
+statistic-reset-all
+*/
 
 // ListCommands gets a list of commands for a given service.
 func ListCommands(c *Client, service Service) ([]string, error) {
-	req := CommandRequest{
-		Command: "list-commands",
-	}
-	if service != "" {
-		req.Service = []Service{service}
-	}
+	_, cmds, err := DoCommand[[]string](c, "list-commands", service)
+	return cmds, err
+}
 
-	var res []CommandResponse
-	if err := c.Call(req, &res); err != nil {
-		return nil, fmt.Errorf("list-commands failed: %w", err)
-	}
-	if len(res) == 0 {
-		return nil, fmt.Errorf("empty response")
-	}
+// StatusGet is a generic helper for unmarshaling a status-get command.
+func StatusGet[T any](c *Client, service Service) (T, error) {
+	_, val, err := DoCommand[T](c, "status-get", service)
+	return val, err
+}
 
-	var commands []string
-	if err := json.Unmarshal(res[0].Arguments, &commands); err != nil {
-		return nil, fmt.Errorf("decode arguments: %w", err)
-	}
-	return commands, nil
+// VersionGet is a generic helper for unmarshaling a version-get command.
+func VersionGet[T any](c *Client, service Service) (string, T, error) {
+	return DoCommand[T](c, "version-get", service)
 }
