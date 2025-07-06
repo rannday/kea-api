@@ -45,8 +45,16 @@ jobs:
       - name: Run Kea container
         run: |
           docker run -d --name kea-int-test -p 8000:8000 kea-custom:latest
-          echo "Waiting for Kea Control Agent..."
-          until curl -s http://localhost:8000 | grep result; do sleep 1; done
+          echo "Waiting for Kea Control Agent (max 60s)..."
+          for i in {1..60}; do
+            if curl -s http://localhost:8000 | grep result; then
+              echo "Kea Control Agent is up."
+              break
+            fi
+            sleep 1
+          done
+          echo "Kea logs (for debugging if needed):"
+          docker logs kea-int-test || true
 
       - name: Run unit tests
         run: go test ./...
@@ -56,4 +64,7 @@ jobs:
 
       - name: Cleanup
         if: always()
-        run: docker stop kea-int-test || true
+        run: |
+          docker stop kea-int-test || true
+          docker rm kea-int-test || true
+          docker image prune -f
