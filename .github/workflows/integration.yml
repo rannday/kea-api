@@ -19,14 +19,28 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: 1.24.x
+          cache: false
+
+      - name: Create mod cache directory
+        run: mkdir -p /home/runner/go/pkg/mod
+
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: /home/runner/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download Go modules
+        run: go mod download
 
       - name: Run unit tests
-        run: go test ./...
+        run: go test -v ./...
 
   integration:
     name: Integration Tests
     needs: unit
-    # Only run if [integration] is in commit message OR PR title
     if: |
       (github.event_name == 'push' && contains(github.event.head_commit.message, '[integration]')) ||
       (github.event_name == 'pull_request' && contains(github.event.pull_request.title, '[integration]'))
