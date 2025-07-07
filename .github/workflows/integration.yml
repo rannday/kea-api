@@ -25,7 +25,7 @@ jobs:
         run: mkdir -p /home/runner/go/pkg/mod
 
       - name: Cache Go modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /home/runner/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
