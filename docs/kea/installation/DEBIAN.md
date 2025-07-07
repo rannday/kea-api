@@ -1,4 +1,6 @@
 # Kea Debian Installation
+https://cloudsmith.io/~isc/repos/stork/setup/#formats-deb
+
 Install some prerequisites:  
 ```bash
 sudo apt install -y curl gnupg apt-transport-https
