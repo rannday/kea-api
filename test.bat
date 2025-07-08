@@ -18,10 +18,10 @@ for %%x in (%*) do (
 
 echo.
 echo === Running unit tests ===
-go test github.com/rannday/kea-api/client ^
-        github.com/rannday/kea-api/agent ^
-        github.com/rannday/kea-api/dhcp4 ^
-        github.com/rannday/kea-api/dhcp6
+go test -cover github.com/rannday/kea-api/client ^
+    github.com/rannday/kea-api/agent ^
+    github.com/rannday/kea-api/dhcp4 ^
+    github.com/rannday/kea-api/dhcp6
 
 if "%RUN_INTEGRATION%"=="true" (
     echo.
@@ -84,13 +84,13 @@ if "%RUN_INTEGRATION%"=="true" (
 
     echo.
     echo === Running integration tests ===
-    go test -tags=integration github.com/rannday/kea-api/client
+    go test -cover -tags=integration github.com/rannday/kea-api/client
 
-    if defined CLEANUP_CONTAINER (
-        echo.
-        echo Stopping Kea container...
-        docker stop %CONTAINER_NAME% >nul
-    )
+    REM if defined CLEANUP_CONTAINER (
+    REM     echo.
+    REM     echo Stopping Kea container...
+    REM     docker stop %CONTAINER_NAME% >nul
+    REM )
 )
 
 endlocal
