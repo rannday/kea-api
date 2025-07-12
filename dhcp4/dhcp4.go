@@ -28,6 +28,11 @@ import (
  * subnet4-delta-add, subnet4-delta-del, subnet4-get, subnet4-list, subnet4-select-test, subnet4-update, subnet4o6-select-test, version-get.
  */
 
+// BuildReport fetches the build configuration report of the DHCPv4 server.
+func BuildReport(c *client.Client) (string, error) {
+	return client.BuildReport(c, client.ServiceDHCP4)
+}
+
 // StatusGet fetches the DHCPv4 server status using the generic helper.
 func StatusGet(c *client.Client) (DHCP4Status, error) {
 	return client.StatusGet[DHCP4Status](c, client.ServiceDHCP4)

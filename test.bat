@@ -84,7 +84,11 @@ if "%RUN_INTEGRATION%"=="true" (
 
     echo.
     echo === Running integration tests ===
-    go test -cover -tags=integration github.com/rannday/kea-api/client
+    go test -v -cover -tags=integration ./internal/tests/...
+    REM go test -cover -tags=integration github.com/rannday/kea-api/client
+    REM go test -cover -tags=integration github.com/rannday/kea-api/agent
+    REM go test -cover -tags=integration github.com/rannday/kea-api/dhcp4
+    REM go test -cover -tags=integration github.com/rannday/kea-api/dhcp6
 
     REM if defined CLEANUP_CONTAINER (
     REM     echo.

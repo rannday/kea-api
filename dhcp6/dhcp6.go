@@ -4,6 +4,11 @@ import (
 	"github.com/rannday/kea-api/client"
 )
 
+// BuildReport fetches the build configuration report of the DHCPv6 server.
+func BuildReport(c *client.Client) (string, error) {
+	return client.BuildReport(c, client.ServiceDHCP6)
+}
+
 // StatusGet fetches the DHCPv6 server status using the generic helper.
 func StatusGet(c *client.Client) (DHCP6Status, error) {
 	return client.StatusGet[DHCP6Status](c, client.ServiceDHCP6)

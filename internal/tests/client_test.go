@@ -20,13 +20,18 @@ func keaURL() string {
 	return "http://localhost:8000"
 }
 
-// TestBasicAuthLive checks that BasicAuth works with Kea's control agent
-func TestBasicAuthLive(t *testing.T) {
+// NewClient returns a default HTTP client for integration tests.
+func NewClient() *client.Client {
 	auth := &client.BasicAuth{
 		Username: "kea",
-		Password: "kea", // matches contents of kea-api-password
+		Password: "kea", // or pull from env
 	}
-	c := client.NewHTTP(keaURL(), client.WithAuth(auth))
+	return client.NewHTTP(keaURL(), client.WithAuth(auth))
+}
+
+// TestBasicAuthLive checks that BasicAuth works with Kea's control agent
+func TestBasicAuthLive(t *testing.T) {
+	c := NewClient()
 
 	var out []client.CommandResponse
 	err := c.Call(client.CommandRequest{Command: "status-get"}, &out)

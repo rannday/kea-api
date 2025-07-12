@@ -8,6 +8,34 @@ import (
 	"github.com/rannday/kea-api/types"
 )
 
+// TestBuildReport tests the BuildReport function for the DHCPv6 service.
+func TestBuildReport(t *testing.T) {
+	t.Parallel()
+
+	want := `Kea source configure results:
+Package:
+  Name: kea-dhcp6
+  Version: 2.6.3
+`
+
+	client := testenv.NewTestClient(t,
+		testenv.ExpectCommand(t, "build-report", "dhcp6"),
+		[]client.CommandResponse{{
+			Result: client.ResultSuccess,
+			Text:   want,
+		}},
+	)
+
+	got, err := BuildReport(client)
+	if err != nil {
+		t.Fatalf("BuildReport() error = %v", err)
+	}
+
+	if got != want {
+		t.Errorf("BuildReport() = %q, want %q", got, want)
+	}
+}
+
 // TestStatusGet tests the StatusGet function for the CtrlDHCP6 type.
 func TestStatusGet(t *testing.T) {
 	t.Parallel()

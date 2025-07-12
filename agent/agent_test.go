@@ -7,6 +7,34 @@ import (
 	"github.com/rannday/kea-api/internal/testenv"
 )
 
+// TestBuildReport tests the BuildReport function for the CtrlAgent type.
+func TestBuildReport(t *testing.T) {
+	t.Parallel()
+
+	want := `Kea source configure results:
+Package:
+  Name: kea
+  Version: 2.6.3
+`
+
+	client := testenv.NewTestClient(t,
+		testenv.ExpectCommand(t, "build-report"),
+		[]client.CommandResponse{{
+			Result: client.ResultSuccess,
+			Text:   want,
+		}},
+	)
+
+	got, err := BuildReport(client)
+	if err != nil {
+		t.Fatalf("BuildReport() error = %v", err)
+	}
+
+	if got != want {
+		t.Errorf("BuildReport() = %q, want %q", got, want)
+	}
+}
+
 // TestStatusGet tests the StatusGet function for the CtrlAgentStatus type.
 func TestStatusGet(t *testing.T) {
 	t.Parallel()
