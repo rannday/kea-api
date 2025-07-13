@@ -1,89 +1,70 @@
 package client
 
-import (
-	"encoding/json"
-	"fmt"
-)
-
-// CallCommand sends a command request and returns the first successful response.
-// It validates the response result and ensures the response is non-empty.
-func CallCommand(c *Client, cmd string, service Service) (CommandResponse, error) {
-	req := CommandRequest{
-		Command: cmd,
-	}
-	if service != "" {
-		req.Service = []Service{service}
-	}
-
-	var res []CommandResponse
-	if err := c.Call(req, &res); err != nil {
-		return CommandResponse{}, fmt.Errorf("%s failed: %w", cmd, err)
-	}
-	if len(res) == 0 {
-		return CommandResponse{}, fmt.Errorf("%s returned empty response", cmd)
-	}
-	if res[0].Result != ResultSuccess {
-		return CommandResponse{}, res[0].Result.ResultError(res[0].Text)
-	}
-
-	return res[0], nil
-}
-
-// CallAndDecode is a shared helper to send a command and unmarshal the result into T.
-func CallAndDecode[T any](c *Client, cmd string, service Service) (string, T, error) {
-	var zero T
-
-	resp, err := CallCommand(c, cmd, service)
-	if err != nil {
-		return "", zero, err
-	}
-
-	if err := json.Unmarshal(resp.Arguments, &zero); err != nil {
-		return resp.Text, zero, fmt.Errorf("decode %s arguments: %w", cmd, err)
-	}
-
-	return resp.Text, zero, nil
-}
-
-/* Shared Kea API commands across ctrl-agent, dhcp4, dhcp6, and ddns
-build-report               config-get                 config-hash-get
-config-reload              config-set                 config-test
-config-write               list-commands              shutdown
-status-get                 version-get
-
-// Shared by dhcp4, dhcp6, and ddns (not ctrl-agent)
-statistic-get              statistic-get-all          statistic-reset
-statistic-reset-all
-*/
-
-// BuildReport fetches compilation metadata from a given service.
+// BuildReport fetches the build-report for a single service.
 func BuildReport(c *Client, service Service) (string, error) {
-	resp, err := CallCommand(c, "build-report", service)
+	text, _, err := DecodeFirstWithText[any](c, "build-report", service)
+	return text, err
+}
+
+// BuildReportMulti fetches the build-report for multiple services.
+func BuildReportMulti(c *Client, services ...Service) ([]string, error) {
+	responses, err := CallCommand(c, "build-report", services...)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return resp.Text, nil
+
+	var reports []string
+	for _, res := range responses {
+		reports = append(reports, res.Text)
+	}
+	return reports, nil
 }
 
-// ConfigGet retrieves the configuration from a given service.
+// ConfigGet fetches the config for a service and decodes it into T.
 func ConfigGet[T any](c *Client, service Service) (T, error) {
-	_, val, err := CallAndDecode[T](c, "config-get", service)
-	return val, err
+	return DecodeFirst[T](c, "config-get", service)
 }
 
-// ListCommands gets a list of commands for a given service.
+// ConfigGetMulti fetches and decodes the configuration of multiple services into []T.
+func ConfigGetMulti[T any](c *Client, services ...Service) ([]T, error) {
+	return CallAndDecode[T](c, "config-get", services...)
+}
+
+// ListCommands fetches the list of supported commands for a service.
 func ListCommands(c *Client, service Service) ([]string, error) {
-	_, cmds, err := CallAndDecode[[]string](c, "list-commands", service)
-	return cmds, err
+	return DecodeFirst[[]string](c, "list-commands", service)
 }
 
-// StatusGet is a generic helper for unmarshaling a status-get command.
+// ListCommandsMulti fetches the list of supported commands for multiple services.
+func ListCommandsMulti(c *Client, services ...Service) ([][]string, error) {
+	return CallAndDecode[[]string](c, "list-commands", services...)
+}
+
+// StatusGet fetches status information for a service and decodes into T.
 func StatusGet[T any](c *Client, service Service) (T, error) {
-	_, val, err := CallAndDecode[T](c, "status-get", service)
-	return val, err
+	return DecodeFirst[T](c, "status-get", service)
 }
 
-// VersionGet is a generic helper for unmarshaling a version-get command.
+// StatusGetMulti fetches status information for multiple services and decodes into []T.
+func StatusGetMulti[T any](c *Client, services ...Service) ([]T, error) {
+	return CallAndDecode[T](c, "status-get", services...)
+}
+
+// VersionGet fetches version info for a service, returning both the full text and the decoded T.
 func VersionGet[T any](c *Client, service Service) (string, T, error) {
-	return CallAndDecode[T](c, "version-get", service)
+	return DecodeFirstWithText[T](c, "version-get", service)
+}
+
+// VersionGetMulti fetches version info for multiple services, returning the raw text for each.
+func VersionGetMulti(c *Client, services ...Service) ([]string, error) {
+	responses, err := CallCommand(c, "version-get", services...)
+	if err != nil {
+		return nil, err
+	}
+
+	var versions []string
+	for _, res := range responses {
+		versions = append(versions, res.Text)
+	}
+	return versions, nil
 }

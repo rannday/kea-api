@@ -75,7 +75,7 @@ func TestConfigGet(t *testing.T) {
 	}
 
 	client := testenv.NewMockClient(t,
-		testenv.ExpectCommand(t, "config-get", client.ServiceDHCP4),
+		testenv.ExpectCommand(t, "config-get", client.Services.DHCP4),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
 			Arguments: testenv.MustEncodeRawJSON(t, want),
@@ -109,7 +109,7 @@ func TestStatusGet(t *testing.T) {
 	}
 
 	client := testenv.NewMockClient(t,
-		testenv.ExpectCommand(t, "status-get", client.ServiceDHCP4),
+		testenv.ExpectCommand(t, "status-get", client.Services.DHCP4),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
 			Arguments: testenv.MustEncodeRawJSON(t, want),
@@ -146,7 +146,7 @@ func TestListCommands(t *testing.T) {
 	}
 
 	client := testenv.NewMockClient(t,
-		testenv.ExpectCommand(t, "list-commands", client.ServiceDHCP4),
+		testenv.ExpectCommand(t, "list-commands", client.Services.DHCP4),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
 			Arguments: testenv.MustEncodeRawJSON(t, want),

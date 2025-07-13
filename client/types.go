@@ -39,11 +39,26 @@ func (r ResultCode) ResultError(text string) error {
 type Service string
 
 // Known services in Kea.
-const (
-	ServiceDHCP4 Service = "dhcp4"
-	ServiceDHCP6 Service = "dhcp6"
-	ServiceDDNS  Service = "d2"
-)
+var Services = struct {
+	Agent Service
+	DHCP4 Service
+	DHCP6 Service
+	DDNS  Service
+}{
+	Agent: "",
+	DHCP4: "dhcp4",
+	DHCP6: "dhcp6",
+	DDNS:  "d2",
+}
+
+// serviceNames converts a list of Service to a slice of strings.
+func serviceNames(services ...Service) []string {
+	out := make([]string, len(services))
+	for i, s := range services {
+		out[i] = string(s)
+	}
+	return out
+}
 
 // CommandRequest represents a Kea API command.
 type CommandRequest struct {

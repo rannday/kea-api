@@ -30,25 +30,25 @@ import (
 
 // BuildReport fetches the build configuration report of the DHCPv4 server.
 func BuildReport(c *client.Client) (string, error) {
-	return client.BuildReport(c, client.ServiceDHCP4)
+	return client.BuildReport(c, client.Services.DHCP4)
 }
 
 // ConfigGet fetches the DHCPv4 configuration using the generic helper.
 func ConfigGet(c *client.Client) (Dhcp4Config, error) {
-	return client.ConfigGet[Dhcp4Config](c, client.ServiceDHCP4)
+	return client.ConfigGet[Dhcp4Config](c, client.Services.DHCP4)
 }
 
 // StatusGet fetches the DHCPv4 server status using the generic helper.
 func StatusGet(c *client.Client) (DHCP4Status, error) {
-	return client.StatusGet[DHCP4Status](c, client.ServiceDHCP4)
+	return client.StatusGet[DHCP4Status](c, client.Services.DHCP4)
 }
 
 // ListCommands fetches the list of commands for DHCPv4.
 func ListCommands(c *client.Client) ([]string, error) {
-	return client.ListCommands(c, client.ServiceDHCP4)
+	return client.ListCommands(c, client.Services.DHCP4)
 }
 
 // VersionGet fetches the DHCPv4 server version using the shared helper.
 func VersionGet(c *client.Client) (string, DHCP4Version, error) {
-	return client.VersionGet[DHCP4Version](c, client.ServiceDHCP4)
+	return client.VersionGet[DHCP4Version](c, client.Services.DHCP4)
 }
