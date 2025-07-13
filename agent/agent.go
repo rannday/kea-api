@@ -15,6 +15,11 @@ func BuildReport(c *client.Client) (string, error) {
 	return client.BuildReport(c, "")
 }
 
+// ConfigGet retrieves the configuration from the control-agent.
+func ConfigGet[T any](c *client.Client) (CtrlAgentConfig, error) {
+	return client.ConfigGet[CtrlAgentConfig](c, "")
+}
+
 // ListCommands fetches the list of commands for the control-agent.
 func ListCommands(c *client.Client) ([]string, error) {
 	return client.ListCommands(c, "")

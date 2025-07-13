@@ -1,6 +1,7 @@
 package dhcp6
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/rannday/kea-api/client"
@@ -33,6 +34,61 @@ Package:
 
 	if got != want {
 		t.Errorf("BuildReport() = %q, want %q", got, want)
+	}
+}
+
+// TestConfigGet tests the ConfigGet function for the Dhcp6Config type.
+func TestConfigGet(t *testing.T) {
+	t.Parallel()
+
+	want := Dhcp6Config{
+		Dhcp6: Dhcp6Block{
+			ControlSocket: types.SocketConfig{
+				SocketName: "/run/kea/kea6-ctrl.sock",
+				SocketType: "unix",
+			},
+			LeaseDatabase: types.LeaseDatabaseConfig{
+				Type: "memfile",
+			},
+			Loggers: []types.LoggerConfig{{
+				Name:       "kea-dhcp6",
+				Severity:   "INFO",
+				DebugLevel: 0,
+				OutputOptions: []types.LogOutputOption{{
+					Output:  "stdout",
+					Pattern: "%-5p %m\n",
+					Flush:   true,
+				}},
+			}},
+			InterfacesConfig: types.InterfacesConfig{
+				Interfaces: []string{"eth1"},
+				ReDetect:   false,
+			},
+			ServerTag:      "v6-default",
+			Subnet6:        []interface{}{},
+			OptionData:     []interface{}{},
+			OptionDef:      []interface{}{},
+			SharedNetworks: []interface{}{},
+			HostsDatabases: []types.DatabaseConfig{},
+		},
+		Hash: "deadbeefcafefeed1234567890abcdef",
+	}
+
+	client := testenv.NewMockClient(t,
+		testenv.ExpectCommand(t, "config-get", client.ServiceDHCP6),
+		[]client.CommandResponse{{
+			Result:    client.ResultSuccess,
+			Arguments: testenv.MustEncodeRawJSON(t, want),
+		}},
+	)
+
+	got, err := ConfigGet(client)
+	if err != nil {
+		t.Fatalf("ConfigGet() error = %v", err)
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("ConfigGet() = %+v, want %+v", got, want)
 	}
 }
 

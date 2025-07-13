@@ -65,6 +65,12 @@ func BuildReport(c *Client, service Service) (string, error) {
 	return resp.Text, nil
 }
 
+// ConfigGet retrieves the configuration from a given service.
+func ConfigGet[T any](c *Client, service Service) (T, error) {
+	_, val, err := CallAndDecode[T](c, "config-get", service)
+	return val, err
+}
+
 // ListCommands gets a list of commands for a given service.
 func ListCommands(c *Client, service Service) ([]string, error) {
 	_, cmds, err := CallAndDecode[[]string](c, "list-commands", service)

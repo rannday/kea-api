@@ -33,6 +33,11 @@ func BuildReport(c *client.Client) (string, error) {
 	return client.BuildReport(c, client.ServiceDHCP4)
 }
 
+// ConfigGet fetches the DHCPv4 configuration using the generic helper.
+func ConfigGet(c *client.Client) (Dhcp4Config, error) {
+	return client.ConfigGet[Dhcp4Config](c, client.ServiceDHCP4)
+}
+
 // StatusGet fetches the DHCPv4 server status using the generic helper.
 func StatusGet(c *client.Client) (DHCP4Status, error) {
 	return client.StatusGet[DHCP4Status](c, client.ServiceDHCP4)

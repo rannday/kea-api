@@ -1,6 +1,7 @@
 package dhcp4
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/rannday/kea-api/client"
@@ -33,6 +34,61 @@ Package:
 
 	if got != want {
 		t.Errorf("BuildReport() = %q, want %q", got, want)
+	}
+}
+
+// TestConfigGet tests the ConfigGet function for the Dhcp4Config type.
+func TestConfigGet(t *testing.T) {
+	t.Parallel()
+
+	want := Dhcp4Config{
+		Dhcp4: Dhcp4Block{
+			Allocator:            "iterative",
+			Authoritative:        true,
+			BootFileName:         "pxelinux.0",
+			ControlSocket:        types.SocketConfig{SocketName: "/run/kea/kea4-ctrl.sock", SocketType: "unix"},
+			EchoClientID:         true,
+			IPReservationsUnique: true,
+			LeaseDatabase:        types.DatabaseConfig{Type: "memfile"},
+			Loggers: []types.LoggerConfig{{
+				Name:       "kea-dhcp4",
+				Severity:   "INFO",
+				DebugLevel: 0,
+				OutputOptions: []types.LogOutputOption{{
+					Output:  "stdout",
+					Pattern: "%-5p %m\n",
+					Flush:   true,
+				}},
+			}},
+			InterfacesConfig: types.InterfacesConfig{
+				Interfaces: []string{"eth0"},
+				ReDetect:   false,
+			},
+			ServerTag:      "default",
+			Subnet4:        []interface{}{},
+			OptionData:     []interface{}{},
+			OptionDef:      []interface{}{},
+			SharedNetworks: []interface{}{},
+			HostsDatabases: []types.DatabaseConfig{},
+		},
+		Hash: "abcdef1234567890",
+	}
+
+	client := testenv.NewMockClient(t,
+		testenv.ExpectCommand(t, "config-get", client.ServiceDHCP4),
+		[]client.CommandResponse{{
+			Result:    client.ResultSuccess,
+			Arguments: testenv.MustEncodeRawJSON(t, want),
+		}},
+	)
+
+	got, err := ConfigGet(client)
+	if err != nil {
+		t.Fatalf("ConfigGet() error = %v", err)
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("ConfigGet() = %+v, want %+v", got, want)
 	}
 }
 
