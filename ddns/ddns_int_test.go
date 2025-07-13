@@ -1,3 +1,3 @@
 //go:build integration
 
-package tests
+package ddns

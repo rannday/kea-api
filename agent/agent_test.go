@@ -17,7 +17,7 @@ Package:
   Version: 2.6.3
 `
 
-	client := testenv.NewTestClient(t,
+	client := testenv.NewMockClient(t,
 		testenv.ExpectCommand(t, "build-report"),
 		[]client.CommandResponse{{
 			Result: client.ResultSuccess,
@@ -45,7 +45,7 @@ func TestStatusGet(t *testing.T) {
 		Reload: 456,
 	}
 
-	client := testenv.NewTestClient(t,
+	client := testenv.NewMockClient(t,
 		testenv.ExpectCommand(t, "status-get"),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
@@ -71,7 +71,7 @@ func TestListCommands(t *testing.T) {
 		"config-test", "config-write", "list-commands", "shutdown", "status-get", "version-get",
 	}
 
-	client := testenv.NewTestClient(t,
+	client := testenv.NewMockClient(t,
 		testenv.ExpectCommand(t, "list-commands"),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,

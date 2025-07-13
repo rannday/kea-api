@@ -1,20 +1,19 @@
 //go:build integration
 
-package tests
+package dhcp4
 
 import (
 	"testing"
 
-	"github.com/rannday/kea-api/agent"
+	"github.com/rannday/kea-api/internal/testenv"
 )
 
-// TestBuildReport checks the actual response from the control agent for build-report.
-func TestBuildReport(t *testing.T) {
+func TestIntegration_BuildReportDHCP4(t *testing.T) {
 	t.Parallel()
 
-	client := NewClient()
+	c := testenv.NewIntegrationClient()
 
-	got, err := agent.BuildReport(client)
+	got, err := BuildReport(c)
 	if err != nil {
 		t.Fatalf("BuildReport() error = %v", err)
 	}
@@ -24,13 +23,12 @@ func TestBuildReport(t *testing.T) {
 	}
 }
 
-// TestStatusGet checks that the control agent returns valid status data.
-func TestStatusGet(t *testing.T) {
+func TestIntegration_StatusGetDHCP4(t *testing.T) {
 	t.Parallel()
 
-	client := NewClient()
+	c := testenv.NewIntegrationClient()
 
-	got, err := agent.StatusGet(client)
+	got, err := StatusGet(c)
 	if err != nil {
 		t.Fatalf("StatusGet() error = %v", err)
 	}
@@ -43,13 +41,12 @@ func TestStatusGet(t *testing.T) {
 	}
 }
 
-// TestListCommands ensures the control agent returns a full command list.
-func TestListCommands(t *testing.T) {
+func TestIntegration_ListCommandsDHCP4(t *testing.T) {
 	t.Parallel()
 
-	client := NewClient()
+	c := testenv.NewIntegrationClient()
 
-	got, err := agent.ListCommands(client)
+	got, err := ListCommands(c)
 	if err != nil {
 		t.Fatalf("ListCommands() error = %v", err)
 	}

@@ -1,0 +1,5 @@
+mode: set
+github.com/rannday/kea-api/dhcp6/dhcp6.go:8.52,10.2 1 1
+github.com/rannday/kea-api/dhcp6/dhcp6.go:13.55,15.2 1 1
+github.com/rannday/kea-api/dhcp6/dhcp6.go:18.55,20.2 1 1
+github.com/rannday/kea-api/dhcp6/dhcp6.go:23.65,25.2 1 0

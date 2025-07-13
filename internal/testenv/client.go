@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/rannday/kea-api/client"
@@ -19,9 +20,9 @@ func MustEncodeRawJSON(t *testing.T, v interface{}) json.RawMessage {
 	return json.RawMessage(b)
 }
 
-// NewTestClient returns a mock *client.Client that expects a specific request
+// NewMockClient returns a mock *client.Client that expects a specific request
 // (validated by the test function) and returns the given responses.
-func NewTestClient(
+func NewMockClient(
 	t *testing.T,
 	validate func(t *testing.T, req client.CommandRequest),
 	responses []client.CommandResponse,
@@ -66,4 +67,20 @@ func ExpectCommand(t *testing.T, wantCommand string, wantService ...client.Servi
 			}
 		}
 	}
+}
+
+func keaURL() string {
+	if url := os.Getenv("KEA_API_URL"); url != "" {
+		return url
+	}
+	return "http://localhost:8000"
+}
+
+// NewIntegrationTestClient returns a default HTTP client for integration tests.
+func NewIntegrationClient() *client.Client {
+	auth := &client.BasicAuth{
+		Username: "kea",
+		Password: "kea",
+	}
+	return client.NewHTTP(keaURL(), client.WithAuth(auth))
 }

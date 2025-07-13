@@ -18,7 +18,7 @@ Package:
   Version: 2.6.3
 `
 
-	client := testenv.NewTestClient(t,
+	client := testenv.NewMockClient(t,
 		testenv.ExpectCommand(t, "build-report", "dhcp4"),
 		[]client.CommandResponse{{
 			Result: client.ResultSuccess,
@@ -52,7 +52,7 @@ func TestStatusGet(t *testing.T) {
 		DHCPState:             types.DHCPState{GloballyDisabled: false},
 	}
 
-	client := testenv.NewTestClient(t,
+	client := testenv.NewMockClient(t,
 		testenv.ExpectCommand(t, "status-get", client.ServiceDHCP4),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
@@ -89,7 +89,7 @@ func TestListCommands(t *testing.T) {
 		"statistic-sample-count-set-all", "status-get", "version-get",
 	}
 
-	client := testenv.NewTestClient(t,
+	client := testenv.NewMockClient(t,
 		testenv.ExpectCommand(t, "list-commands", client.ServiceDHCP4),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
