@@ -150,3 +150,35 @@ func TestListCommands(t *testing.T) {
 		}
 	}
 }
+
+// TestVersionGet tests the VersionGet function for the CtrlAgent type.
+func TestVersionGet(t *testing.T) {
+	t.Parallel()
+
+	wantText := "2.6.3"
+	want := CtrlAgentVersion{
+		Extended: "2.6.3 (isc20250522135511 deb)\npremium: yes (isc20250522135511 deb)\nlinked with:\n- log4cplus 2.0.8\n- OpenSSL 3.0.16 11 Feb 2025",
+	}
+
+	mockClient := testenv.NewMockClient(t,
+		testenv.ExpectCommand(t, "version-get", client.Services.Agent),
+		[]client.CommandResponse{{
+			Result:    client.ResultSuccess,
+			Text:      wantText,
+			Arguments: testenv.MustEncodeRawJSON(t, want),
+		}},
+	)
+
+	gotText, gotVersion, err := VersionGet(mockClient)
+	if err != nil {
+		t.Fatalf("VersionGet() error = %v", err)
+	}
+
+	if gotText != wantText {
+		t.Errorf("VersionGet() text = %q, want %q", gotText, wantText)
+	}
+
+	if gotVersion != want {
+		t.Errorf("VersionGet() = %+v, want %+v", gotVersion, want)
+	}
+}

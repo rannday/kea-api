@@ -64,21 +64,3 @@ type CommandResponse struct {
 	Arguments json.RawMessage `json:"arguments,omitempty"`
 	Text      string          `json:"text,omitempty"`
 }
-
-// AsMap attempts to decode Arguments into a map.
-func (r *CommandResponse) AsMap() (map[string]interface{}, error) {
-	var out map[string]interface{}
-	if err := json.Unmarshal(r.Arguments, &out); err != nil {
-		return nil, fmt.Errorf("arguments is not a JSON object: %w", err)
-	}
-	return out, nil
-}
-
-// AsList attempts to unmarshal Arguments into a list of strings.
-func (r *CommandResponse) AsList() ([]string, error) {
-	var out []string
-	if err := json.Unmarshal(r.Arguments, &out); err != nil {
-		return nil, fmt.Errorf("arguments is not a list of strings: %w", err)
-	}
-	return out, nil
-}
