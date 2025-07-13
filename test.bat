@@ -18,10 +18,24 @@ for %%x in (%*) do (
 
 echo.
 echo === Running unit tests ===
-go test -cover github.com/rannday/kea-api/client ^
+REM Run unit tests with full coverage and output to a single file
+go test -covermode=atomic -coverpkg=./... -coverprofile=coverage.unit.out ^
+  github.com/rannday/kea-api/client ^
   github.com/rannday/kea-api/agent ^
   github.com/rannday/kea-api/dhcp4 ^
   github.com/rannday/kea-api/dhcp6
+
+go tool cover -func=coverage.unit.out > coverage.unit.summary
+
+REM Generate HTML report from coverage.out
+if exist coverage.unit.out (
+  go tool cover -html=coverage.unit.out -o coverage.unit.html
+  echo.
+  echo === Coverage report generated: coverage.unit.html ===
+  start "" coverage.unit.html
+) else (
+  echo Coverage file not found. Skipping HTML generation.
+)
 
 if "%RUN_INTEGRATION%"=="true" (
   echo.
@@ -101,6 +115,8 @@ if "%RUN_INTEGRATION%"=="true" (
   echo Deleting coverage files.
   del /q coverage.client.out coverage.agent.out coverage.dhcp4.out coverage.dhcp6.out >nul 2>&1
 )
+
+del /q coverage.unit.out >nul 2>&1
 
 echo.
 echo === Done ===
