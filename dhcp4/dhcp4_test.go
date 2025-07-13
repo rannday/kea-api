@@ -19,15 +19,16 @@ Package:
   Version: 2.6.3
 `
 
-	client := testenv.NewMockClient(t,
-		testenv.ExpectCommand(t, "build-report", "dhcp4"),
+	mockClient := testenv.NewMockClient(t,
+		testenv.ExpectCommand(t, "build-report", client.Services.DHCP4),
 		[]client.CommandResponse{{
-			Result: client.ResultSuccess,
-			Text:   want,
+			Result:    client.ResultSuccess,
+			Text:      want,
+			Arguments: testenv.MustEncodeRawJSON(t, map[string]any{}),
 		}},
 	)
 
-	got, err := BuildReport(client)
+	got, err := BuildReport(mockClient)
 	if err != nil {
 		t.Fatalf("BuildReport() error = %v", err)
 	}
@@ -108,7 +109,7 @@ func TestStatusGet(t *testing.T) {
 		DHCPState:             types.DHCPState{GloballyDisabled: false},
 	}
 
-	client := testenv.NewMockClient(t,
+	mockClient := testenv.NewMockClient(t,
 		testenv.ExpectCommand(t, "status-get", client.Services.DHCP4),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
@@ -116,7 +117,7 @@ func TestStatusGet(t *testing.T) {
 		}},
 	)
 
-	got, err := StatusGet(client)
+	got, err := StatusGet(mockClient)
 	if err != nil {
 		t.Fatalf("StatusGet() error = %v", err)
 	}
@@ -145,7 +146,7 @@ func TestListCommands(t *testing.T) {
 		"statistic-sample-count-set-all", "status-get", "version-get",
 	}
 
-	client := testenv.NewMockClient(t,
+	mockClient := testenv.NewMockClient(t,
 		testenv.ExpectCommand(t, "list-commands", client.Services.DHCP4),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
@@ -153,7 +154,7 @@ func TestListCommands(t *testing.T) {
 		}},
 	)
 
-	got, err := ListCommands(client)
+	got, err := ListCommands(mockClient)
 	if err != nil {
 		t.Fatalf("ListCommands() error = %v", err)
 	}

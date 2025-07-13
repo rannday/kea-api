@@ -51,15 +51,6 @@ var Services = struct {
 	DDNS:  "d2",
 }
 
-// serviceNames converts a list of Service to a slice of strings.
-func serviceNames(services ...Service) []string {
-	out := make([]string, len(services))
-	for i, s := range services {
-		out[i] = string(s)
-	}
-	return out
-}
-
 // CommandRequest represents a Kea API command.
 type CommandRequest struct {
 	Command   string                 `json:"command"`

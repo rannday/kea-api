@@ -36,6 +36,7 @@ func NewMockClient(
 			http.Error(w, "bad request", http.StatusBadRequest)
 			return
 		}
+
 		validate(t, req)
 
 		if err := json.NewEncoder(w).Encode(responses); err != nil {
@@ -57,9 +58,10 @@ func ExpectCommand(t *testing.T, wantCommand string, wantService ...client.Servi
 		if req.Command != wantCommand {
 			t.Errorf("unexpected command: got %q, want %q", req.Command, wantCommand)
 		}
-		if len(wantService) == 0 {
-			if req.Service != nil {
-				t.Errorf("expected no service, got: %v", req.Service)
+		if len(wantService) == 0 || (len(wantService) == 1 && wantService[0] == client.Services.Agent) {
+			// Control Agent — expect nil or [""] or empty
+			if req.Service != nil && !(len(req.Service) == 1 && req.Service[0] == client.Services.Agent) {
+				t.Errorf("expected agent/no service, got: %v", req.Service)
 			}
 		} else {
 			if len(req.Service) != len(wantService) || req.Service[0] != wantService[0] {

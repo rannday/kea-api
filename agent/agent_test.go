@@ -19,15 +19,16 @@ Package:
   Version: 2.6.3
 `
 
-	client := testenv.NewMockClient(t,
-		testenv.ExpectCommand(t, "build-report"),
+	mockClient := testenv.NewMockClient(t,
+		testenv.ExpectCommand(t, "build-report", client.Services.Agent),
 		[]client.CommandResponse{{
-			Result: client.ResultSuccess,
-			Text:   want,
+			Result:    client.ResultSuccess,
+			Text:      want,
+			Arguments: testenv.MustEncodeRawJSON(t, map[string]any{}),
 		}},
 	)
 
-	got, err := BuildReport(client)
+	got, err := BuildReport(mockClient)
 	if err != nil {
 		t.Fatalf("BuildReport() error = %v", err)
 	}
@@ -74,15 +75,15 @@ func TestConfigGet(t *testing.T) {
 		Hash: "07FC3D1A1717B92D5A3D7E2E4900BCAF9916C8DDA3DB013390C49FBD5D035CB6",
 	}
 
-	client := testenv.NewMockClient(t,
-		testenv.ExpectCommand(t, "config-get"),
+	mockClient := testenv.NewMockClient(t,
+		testenv.ExpectCommand(t, "config-get", client.Services.Agent),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
 			Arguments: testenv.MustEncodeRawJSON(t, want),
 		}},
 	)
 
-	got, err := ConfigGet[CtrlAgentConfig](client)
+	got, err := ConfigGet[CtrlAgentConfig](mockClient)
 	if err != nil {
 		t.Fatalf("ConfigGet() error = %v", err)
 	}
@@ -102,15 +103,15 @@ func TestStatusGet(t *testing.T) {
 		Reload: 456,
 	}
 
-	client := testenv.NewMockClient(t,
-		testenv.ExpectCommand(t, "status-get"),
+	mockClient := testenv.NewMockClient(t,
+		testenv.ExpectCommand(t, "status-get", client.Services.Agent),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
 			Arguments: testenv.MustEncodeRawJSON(t, want),
 		}},
 	)
 
-	got, err := StatusGet(client)
+	got, err := StatusGet(mockClient)
 	if err != nil {
 		t.Fatalf("StatusGet() error = %v", err)
 	}
@@ -128,15 +129,15 @@ func TestListCommands(t *testing.T) {
 		"config-test", "config-write", "list-commands", "shutdown", "status-get", "version-get",
 	}
 
-	client := testenv.NewMockClient(t,
-		testenv.ExpectCommand(t, "list-commands"),
+	mockClient := testenv.NewMockClient(t,
+		testenv.ExpectCommand(t, "list-commands", client.Services.Agent),
 		[]client.CommandResponse{{
 			Result:    client.ResultSuccess,
 			Arguments: testenv.MustEncodeRawJSON(t, want),
 		}},
 	)
 
-	got, err := ListCommands(client)
+	got, err := ListCommands(mockClient)
 	if err != nil {
 		t.Fatalf("ListCommands() error = %v", err)
 	}
