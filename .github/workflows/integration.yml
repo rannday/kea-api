@@ -81,18 +81,7 @@ jobs:
       - name: Run Kea container
         run: |
           docker run -d --name kea-int-test -p 8000:8000 kea-custom:latest
-          echo "Waiting for Kea Control Agent (max 60s)..."
-          for i in {1..60}; do
-            response=$(curl -sf http://localhost:8000 || true)
-            if echo "$response" | grep -q '"result"[[:space:]]*:[[:space:]]*0'; then
-              echo "Kea Control Agent is up."
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "Kea Control Agent did not respond."
-          curl -s http://localhost:8000 || true
-          exit 1
+          sleep 5
 
       - name: Run integration tests
         run: go test -v -tags=integration ./...
