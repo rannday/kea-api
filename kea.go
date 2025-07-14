@@ -9,29 +9,42 @@ import (
 	"github.com/rannday/kea-api/dhcp6"
 )
 
-// Shared Client type
 type Client = client.Client
 
-// Top-level constructors (unified)
+// Client
 var (
 	NewHTTP   = client.NewHTTP
 	NewSocket = client.NewSocket
 )
 
-// Control Agent API
+// Control Agent
 var (
-	StatusGet    = agent.StatusGet
+	BuildReport  = agent.BuildReport
+	ConfigGet    = agent.ConfigGet
 	ListCommands = agent.ListCommands
+	StatusGet    = agent.StatusGet
+	VersionGet   = agent.VersionGet
 )
 
-// DHCPv4 API
+// DHCPv4
 var (
-	StatusGet4    = dhcp4.StatusGet
+	BuildReport4  = dhcp4.BuildReport
+	ConfigGet4    = dhcp4.ConfigGet
 	ListCommands4 = dhcp4.ListCommands
+	StatusGet4    = dhcp4.StatusGet
+	VersionGet4   = dhcp4.VersionGet
 )
 
-// DHCPv6 API
+// DHCPv6
 var (
-	StatusGet6    = dhcp6.StatusGet
+	BuildReport6  = dhcp6.BuildReport
+	ConfigGet6    = dhcp6.ConfigGet
 	ListCommands6 = dhcp6.ListCommands
+	StatusGet6    = dhcp6.StatusGet
+	VersionGet6   = dhcp6.VersionGet
 )
+
+// DDNS
+/*var (
+	
+)*/

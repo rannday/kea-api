@@ -83,7 +83,7 @@ func TestConfigGet(t *testing.T) {
 		}},
 	)
 
-	got, err := ConfigGet[CtrlAgentConfig](mockClient)
+	got, err := ConfigGet(mockClient)
 	if err != nil {
 		t.Fatalf("ConfigGet() error = %v", err)
 	}

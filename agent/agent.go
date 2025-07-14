@@ -16,7 +16,7 @@ func BuildReport(c *client.Client) (string, error) {
 }
 
 // ConfigGet retrieves the configuration from the control-agent.
-func ConfigGet[T any](c *client.Client) (CtrlAgentConfig, error) {
+func ConfigGet(c *client.Client) (CtrlAgentConfig, error) {
 	return client.ConfigGet[CtrlAgentConfig](c, "")
 }
 
