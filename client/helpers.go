@@ -33,6 +33,16 @@ func CallCommand(c *Client, cmd string, services ...Service) ([]CommandResponse,
 	return res, nil
 }
 
+// CallAndExtractText sends a command and returns only the .Text from the first successful response.
+func CallAndExtractText(c *Client, cmd string, service Service) (string, error) {
+  responses, err := CallCommand(c, cmd, service)
+  if err != nil {
+    return "", err
+  }
+
+  return responses[0].Text, nil
+}
+
 // CallAndDecode sends a command and decodes all successful responses into a slice of T.
 func CallAndDecode[T any](c *Client, cmd string, services ...Service) ([]T, error) {
 	responses, err := CallCommand(c, cmd, services...)

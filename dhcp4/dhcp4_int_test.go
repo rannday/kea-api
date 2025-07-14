@@ -8,6 +8,7 @@ import (
 	"github.com/rannday/kea-api/internal/testenv"
 )
 
+// TestIntegration_BuildReportDHCP4 verifies BuildReport returns non-empty build details.
 func TestIntegration_BuildReportDHCP4(t *testing.T) {
 	t.Parallel()
 
@@ -23,6 +24,7 @@ func TestIntegration_BuildReportDHCP4(t *testing.T) {
 	}
 }
 
+// TestIntegration_StatusGetDHCP4 checks that StatusGet returns valid PID and uptime.
 func TestIntegration_StatusGetDHCP4(t *testing.T) {
 	t.Parallel()
 
@@ -41,6 +43,7 @@ func TestIntegration_StatusGetDHCP4(t *testing.T) {
 	}
 }
 
+// TestIntegration_ListCommandsDHCP4 ensures ListCommands returns known DHCPv4 commands.
 func TestIntegration_ListCommandsDHCP4(t *testing.T) {
 	t.Parallel()
 
@@ -65,5 +68,43 @@ func TestIntegration_ListCommandsDHCP4(t *testing.T) {
 	}
 	if !found {
 		t.Errorf("ListCommands() missing expected command %q", want)
+	}
+}
+
+// TestIntegration_ConfigGetDHCP4 verifies ConfigGet returns a valid DHCPv4 config and hash.
+func TestIntegration_ConfigGetDHCP4(t *testing.T) {
+	t.Parallel()
+
+	c := testenv.NewIntegrationClient()
+
+	got, err := ConfigGet(c)
+	if err != nil {
+		t.Fatalf("ConfigGet() error = %v", err)
+	}
+
+	if got.Hash == "" {
+		t.Error("ConfigGet() returned empty config hash")
+	}
+	if got.Dhcp4.Allocator == "" && got.Dhcp4.ServerTag == "" {
+		t.Errorf("ConfigGet() returned unexpected Dhcp4 block: %+v", got.Dhcp4)
+	}
+}
+
+// TestIntegration_VersionGetDHCP4 checks VersionGet returns both short and extended version info.
+func TestIntegration_VersionGetDHCP4(t *testing.T) {
+	t.Parallel()
+
+	c := testenv.NewIntegrationClient()
+
+	gotText, gotVersion, err := VersionGet(c)
+	if err != nil {
+		t.Fatalf("VersionGet() error = %v", err)
+	}
+
+	if gotText == "" {
+		t.Error("VersionGet() returned empty text")
+	}
+	if gotVersion.Extended == "" {
+		t.Errorf("VersionGet() returned empty extended version: %+v", gotVersion)
 	}
 }

@@ -2,8 +2,7 @@ package client
 
 // BuildReport fetches the build-report for a single service.
 func BuildReport(c *Client, service Service) (string, error) {
-	text, _, err := DecodeFirstWithText[any](c, "build-report", service)
-	return text, err
+	return CallAndExtractText(c, "build-report", service)
 }
 
 // BuildReportMulti fetches the build-report for multiple services.
@@ -13,7 +12,7 @@ func BuildReportMulti(c *Client, services ...Service) ([]string, error) {
 		return nil, err
 	}
 
-	var reports []string
+	reports := make([]string, 0, len(responses))
 	for _, res := range responses {
 		reports = append(reports, res.Text)
 	}

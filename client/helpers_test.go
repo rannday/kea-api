@@ -187,3 +187,27 @@ func TestDecodeFirstWithText_Error(t *testing.T) {
 		t.Errorf("expected decode error, got %v", err)
 	}
 }
+
+// TestCallAndExtractText verifies .Text is extracted without decoding .Arguments.
+func TestCallAndExtractText(t *testing.T) {
+	client := newMockClient([]CommandResponse{
+		{Result: ResultSuccess, Text: "build-report text"},
+	}, nil)
+
+	got, err := CallAndExtractText(client, "build-report", "svc")
+	if err != nil {
+		t.Fatalf("CallAndExtractText() error = %v", err)
+	}
+	if got != "build-report text" {
+		t.Errorf("CallAndExtractText() = %q, want %q", got, "build-report text")
+	}
+}
+
+// TestCallAndExtractText_Error verifies error handling.
+func TestCallAndExtractText_Error(t *testing.T) {
+	client := newMockClient([]CommandResponse{}, nil) // triggers "empty response"
+	_, err := CallAndExtractText(client, "build-report", "svc")
+	if err == nil || !strings.Contains(err.Error(), "returned empty response") {
+		t.Errorf("expected empty response error, got %v", err)
+	}
+}

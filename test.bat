@@ -90,32 +90,68 @@ if "%RUN_INTEGRATION%"=="true" (
   for /f %%i in ('docker ps -q --filter "name=%CONTAINER_NAME%"') do set CONTAINER_RUNNING=%%i
 
   if not defined CONTAINER_RUNNING (
-    docker run -d --rm --name %CONTAINER_NAME% -p 8000:8000 %IMAGE_NAME%
+    docker run -d --rm --name %CONTAINER_NAME% ^
+      --cap-add=NET_ADMIN ^
+      -p 8000:8000 ^
+      -p 6767:67/udp ^
+      -p 6547:547/udp ^
+      -v "%KEA_DOCKER_PATH%\config:/etc/kea:ro" ^
+      -v "%KEA_DOCKER_PATH%\logs:/var/log/kea" ^
+      %IMAGE_NAME%
+
+    REM docker run -d --rm --name %CONTAINER_NAME% -p 8000:8000 %IMAGE_NAME%
     set CLEANUP_CONTAINER=true
-    echo Waiting for Kea to be ready...
-    timeout /t 3 >nul
+    
+    echo Waiting for Kea container to become healthy...
+    set "MAX_ATTEMPTS=15"
+    set /a attempt=0
+    :wait_for_healthy
+    set /a attempt+=1
+    for /f %%h in ('docker inspect -f "{{.State.Health.Status}}" %CONTAINER_NAME% 2^>nul') do set CONTAINER_HEALTH=%%h
+
+    if /i "!CONTAINER_HEALTH!"=="healthy" (
+      echo Kea container is healthy.
+    ) else if "!attempt!" GEQ "!MAX_ATTEMPTS!" (
+      echo ERROR: Kea container did not become healthy after %MAX_ATTEMPTS% attempts.
+      echo Dumping logs:
+      docker ps -a --filter "name=%CONTAINER_NAME%"
+      docker logs %CONTAINER_NAME%
+      exit /b 1
+    ) else (
+      timeout /t 2 >nul
+      goto wait_for_healthy
+    )
+
   ) else (
       echo Container already running. Reusing it.
   )
 
   echo.
-  echo === Running integration tests with coverage ===
-  go test -cover -coverpkg=./client -coverprofile=coverage.client.out -tags=integration github.com/rannday/kea-api/client
-  go test -cover -coverpkg=./agent -coverprofile=coverage.agent.out -tags=integration github.com/rannday/kea-api/agent
-  go test -cover -coverpkg=./dhcp4 -coverprofile=coverage.dhcp4.out -tags=integration github.com/rannday/kea-api/dhcp4
-  go test -cover -coverpkg=./dhcp6 -coverprofile=coverage.dhcp6.out -tags=integration github.com/rannday/kea-api/dhcp6
+  echo === Running integration tests ===
+  go test -covermode=atomic ^
+    -coverpkg=github.com/rannday/kea-api/client,github.com/rannday/kea-api/agent,github.com/rannday/kea-api/dhcp4,github.com/rannday/kea-api/dhcp6 ^
+    -coverprofile=coverage.integration.out ^
+    -tags=integration ^
+    github.com/rannday/kea-api/client ^
+    github.com/rannday/kea-api/agent ^
+    github.com/rannday/kea-api/dhcp4 ^
+    github.com/rannday/kea-api/dhcp6
 
-  REM echo.
-  REM echo === Coverage summary ===
-  REM go tool cover -func=coverage.client.out
-  REM go tool cover -func=coverage.agent.out
-  REM go tool cover -func=coverage.dhcp4.out
-  REM go tool cover -func=coverage.dhcp6.out
+  go tool cover -func=coverage.integration.out > coverage.integration.summary
+
+  if exist coverage.integration.out (
+    go tool cover -html=coverage.integration.out -o coverage.integration.html
+    echo.
+    echo === Integration coverage report generated: coverage.integration.html ===
+    start "" coverage.integration.html
+  ) else (
+    echo Integration coverage file not found. Skipping HTML generation.
+  )
 
   echo.
   echo === Cleanup ===
   echo Deleting coverage files.
-  del /q coverage.client.out coverage.agent.out coverage.dhcp4.out coverage.dhcp6.out >nul 2>&1
+  del /q coverage.integration.out >nul 2>&1
 )
 
 del /q coverage.unit.out >nul 2>&1
