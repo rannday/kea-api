@@ -167,3 +167,42 @@ func TestListCommands(t *testing.T) {
 		}
 	}
 }
+
+// TestVersionGet checks the VersionGet function for DHCP4 returns both text and typed extended version info.
+func TestVersionGet(t *testing.T) {
+	t.Parallel()
+
+	wantText := "2.6.3"
+	wantArgs := DHCP4Version{
+		Extended: `2.6.3 (isc20250522135511 deb)
+premium: yes (isc20250522135511 deb)
+linked with:
+- log4cplus 2.0.8
+- OpenSSL 3.0.16 11 Feb 2025
+backends:
+- MySQL backend 22.2, library 3.3.14
+- PostgreSQL backend 22.2, library 150013
+- Memfile backend 3.0`,
+	}
+
+	mockClient := testenv.NewMockClient(t,
+		testenv.ExpectCommand(t, "version-get", client.Services.DHCP4),
+		[]client.CommandResponse{{
+			Result:    client.ResultSuccess,
+			Text:      wantText,
+			Arguments: testenv.MustEncodeRawJSON(t, wantArgs),
+		}},
+	)
+
+	gotText, gotArgs, err := VersionGet(mockClient)
+	if err != nil {
+		t.Fatalf("VersionGet() error = %v", err)
+	}
+
+	if gotText != wantText {
+		t.Errorf("VersionGet() text = %q, want %q", gotText, wantText)
+	}
+	if gotArgs.Extended != wantArgs.Extended {
+		t.Errorf("VersionGet() extended = %q, want %q", gotArgs.Extended, wantArgs.Extended)
+	}
+}

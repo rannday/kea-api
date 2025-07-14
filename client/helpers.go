@@ -54,30 +54,26 @@ func CallAndDecode[T any](c *Client, cmd string, services ...Service) ([]T, erro
 
 // DecodeFirst sends a command and decodes the first response into T.
 func DecodeFirst[T any](c *Client, cmd string, service Service) (T, error) {
-	var zero T
 	vals, err := CallAndDecode[T](c, cmd, service)
 	if err != nil {
+		var zero T
 		return zero, err
-	}
-	if len(vals) == 0 {
-		return zero, fmt.Errorf("%s: no response returned", cmd)
 	}
 	return vals[0], nil
 }
 
 // DecodeFirstWithText sends a command and decodes the first response into T, also returning the text field.
 func DecodeFirstWithText[T any](c *Client, cmd string, service Service) (string, T, error) {
-	var zero T
 	responses, err := CallCommand(c, cmd, service)
 	if err != nil {
+		var zero T
 		return "", zero, err
 	}
-	if len(responses) == 0 {
-		return "", zero, fmt.Errorf("%s: no response returned", cmd)
-	}
+
 	text := responses[0].Text
-	if err := json.Unmarshal(responses[0].Arguments, &zero); err != nil {
-		return text, zero, fmt.Errorf("%s: decode arguments: %w", cmd, err)
+	var decoded T
+	if err := json.Unmarshal(responses[0].Arguments, &decoded); err != nil {
+		return text, decoded, fmt.Errorf("%s: decode arguments: %w", cmd, err)
 	}
-	return text, zero, nil
+	return text, decoded, nil
 }

@@ -19,7 +19,9 @@ for %%x in (%*) do (
 echo.
 echo === Running unit tests ===
 REM Run unit tests with full coverage and output to a single file
-go test -covermode=atomic -coverpkg=./... -coverprofile=coverage.unit.out ^
+go test -covermode=atomic ^
+  -coverpkg=github.com/rannday/kea-api/client,github.com/rannday/kea-api/agent,github.com/rannday/kea-api/dhcp4,github.com/rannday/kea-api/dhcp6 ^
+  -coverprofile=coverage.unit.out ^
   github.com/rannday/kea-api/client ^
   github.com/rannday/kea-api/agent ^
   github.com/rannday/kea-api/dhcp4 ^
