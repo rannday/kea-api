@@ -81,7 +81,14 @@ jobs:
       - name: Run Kea container
         run: |
           docker run -d --name kea-int-test -p 8000:8000 kea-custom:latest
-          sleep 5
+          echo "Waiting for Kea healthcheck..."
+          for i in {1..30}; do
+            if [ "$(docker inspect -f '{{.State.Health.Status}}' kea-int-test)" == "healthy" ]; then
+              echo "Kea container is healthy"
+              break
+            fi
+            sleep 1
+          done
 
       - name: Run integration tests
         run: go test -v -tags=integration ./...
