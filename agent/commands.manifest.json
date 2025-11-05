@@ -1,0 +1,17 @@
+[
+  "status-get",
+  "config-get",
+  "config-test",
+  "config-write",
+  "config-reload",
+  "list-commands",
+  "version-get",
+  "shutdown",
+  "process-get",
+  "statistic-get",
+  "statistic-reset",
+  "statistic-get-all",
+  "ha-keepalive",
+  "ha-heartbeat",
+  "build-report"
+]
