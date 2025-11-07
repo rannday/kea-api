@@ -1,9 +1,0 @@
-model = "gpt-5-codex"                 # default model
-approval_policy = "on-request"        # untrusted|on-failure|on-request|never
-sandbox_mode = "workspace-write"      # read-only|workspace-write|danger-full-access
-model_reasoning_effort = "high"       # none|low|medium|high
-
-[profiles.review]
-model = "gpt-5-pro"
-model_reasoning_effort = "high"
-approval_policy = "never"
