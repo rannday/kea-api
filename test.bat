@@ -3,12 +3,15 @@ setlocal enabledelayedexpansion
 
 REM Config
 set CONTAINER_NAME=kea-int-test
-set IMAGE_NAME=kea-custom:latest
+set IMAGE_NAME=kea-lab:latest
 set KEA_DOCKER_PATH=..\kea-docker
 
 REM Flags
 set RUN_INTEGRATION=false
 set FORCE_REBUILD=false
+
+REM Internal flags
+set CLEANUP_CONTAINER=false
 
 REM Parse CLI args
 for %%x in (%*) do (
@@ -99,7 +102,6 @@ if "%RUN_INTEGRATION%"=="true" (
       -v "%KEA_DOCKER_PATH%\logs:/var/log/kea" ^
       %IMAGE_NAME%
 
-    REM docker run -d --rm --name %CONTAINER_NAME% -p 8000:8000 %IMAGE_NAME%
     set CLEANUP_CONTAINER=true
     
     echo Waiting for Kea container to become healthy...
@@ -113,12 +115,22 @@ if "%RUN_INTEGRATION%"=="true" (
       echo Kea container is healthy.
     ) else if "!attempt!" GEQ "!MAX_ATTEMPTS!" (
       echo ERROR: Kea container did not become healthy after %MAX_ATTEMPTS% attempts.
+      
+      echo .
       echo Dumping logs:
       docker ps -a --filter "name=%CONTAINER_NAME%"
+
+      echo.
+      echo === Healthcheck log ===
+      docker inspect -f "{{range .State.Health.Log}}{{println .End \" \" .ExitCode \" \" .Output}}{{end}}" %CONTAINER_NAME%
+      
+      echo.
+      echo === Container logs ===
       docker logs %CONTAINER_NAME%
+
       exit /b 1
     ) else (
-      timeout /t 2 >nul
+      timeout /t 3 >nul
       goto wait_for_healthy
     )
 
@@ -148,13 +160,19 @@ if "%RUN_INTEGRATION%"=="true" (
     echo Integration coverage file not found. Skipping HTML generation.
   )
 
-  echo.
-  echo === Cleanup ===
-  echo Deleting coverage files.
-  del /q coverage.integration.out >nul 2>&1
+)
+
+:cleanup
+echo.
+echo === Cleanup ===
+
+if "%CLEANUP_CONTAINER%"=="true" (
+  echo Stopping container %CONTAINER_NAME%...
+  docker stop %CONTAINER_NAME% >nul 2>&1
 )
 
 del /q coverage.unit.out >nul 2>&1
+if exist coverage.integration.out del /q coverage.integration.out >nul 2>&1
 
 echo.
 echo === Done ===

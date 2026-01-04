@@ -23,7 +23,10 @@ Typed Go wrappers for the ISC Kea **Control Agent**, **DHCPv4**, **DHCPv6**, and
 | `internal/utils/` | Shared miscellaneous utilities. |
 | `internal/testenv/` | Mock servers + Docker helpers for integration tests. |
 | `examples/` | Runnable examples of common API flows. |
+| `docs/codex/` | Important information for Codex. | 
 | `docs/kea/calls/` | Real curl requests/responses used as reference and for golden JSON. |
+| `docs/dev/` | Development environment setup - ignore. |
+| `docs/go/` | Golang information - ignore. | 
 
 ## Testing
 - **You do not run tests!** You only write/update tests.
